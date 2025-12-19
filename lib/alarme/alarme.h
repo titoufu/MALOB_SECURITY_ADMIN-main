@@ -44,5 +44,6 @@ void checkDailyRestart();
 
 extern int HORA_RESTART;
 extern bool RESTART_CONFIG;
+extern int ultimoDiaReinicio;
 
 #endif

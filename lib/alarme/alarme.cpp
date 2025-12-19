@@ -2,27 +2,25 @@
 #include "event_logger.h"
 #include "system_config.h"
 #include "web_server.h"
+#include <time.h>
 
 extern std::vector<String> todasZonas;
 
-int HORA_RESTART = 23;
-bool RESTART_CONFIG = false;
-int ultimoDiaReinicio = -1; // último dia que ocorreu o reinício
+// ====== DEFINIÇÕES (precisam existir em 1 .cpp só) ======
+int  HORA_RESTART      = 23;
+bool RESTART_CONFIG    = false;
+int  ultimoDiaReinicio = -1;
 
 // Construtor
-Alarme::Alarme() : estadoAtual(Estado::DESARMADO), modoAtual(Modo::MANUAL), sirene(nullptr) {}
+Alarme::Alarme()
+: estadoAtual(Estado::DESARMADO),
+  modoAtual(Modo::MANUAL),
+  sirene(nullptr)
+{}
 
-void Alarme::definirSirene(Sirene *s)
-{
-    sirene = s;
-}
+void Alarme::definirSirene(Sirene *s) { sirene = s; }
+void Alarme::adicionarZona(Zona *zona) { zonas.push_back(zona); }
 
-void Alarme::adicionarZona(Zona *zona)
-{
-    zonas.push_back(zona);
-}
-
-// Arma zonas específicas
 void Alarme::armar(const std::vector<String> &zonasSelecionadas)
 {
     estadoAtual = Estado::ARMADO;
@@ -30,43 +28,27 @@ void Alarme::armar(const std::vector<String> &zonasSelecionadas)
 
     for (auto zona : zonas)
     {
-        if (zonaEstaAtiva(zona->getNome()))
-        {
-            zona->armar();
-        }
-        else
-        {
-            zona->desarmar();
-        }
+        if (zonaEstaAtiva(zona->getNome())) zona->armar();
+        else                               zona->desarmar();
     }
 
-    if (sirene)
-        sirene->desativar();
+    if (sirene) sirene->desativar();
 }
 
-// Desarma todas as zonas
 void Alarme::desarmar()
 {
     estadoAtual = Estado::DESARMADO;
-
-    for (auto zona : zonas)
-    {
-        zona->desarmar();
-    }
-
-    if (sirene)
-        sirene->desativar();
+    for (auto zona : zonas) zona->desarmar();
+    if (sirene) sirene->desativar();
 }
 
-// Atualiza o estado do alarme verificando zonas e sensores
 void Alarme::atualizar()
 {
-    if (estadoAtual != Estado::ARMADO)
-        return;
+    if (estadoAtual != Estado::ARMADO) return;
+
     for (auto zona : zonas)
     {
-        if (!zonaEstaAtiva(zona->getNome()))
-            continue;
+        if (!zonaEstaAtiva(zona->getNome())) continue;
 
         zona->atualizar();
 
@@ -78,119 +60,92 @@ void Alarme::atualizar()
                     sensor->getSituacao() == Sensor::Situacao::ATIVO &&
                     !sensor->foiAlertaEmitido())
                 {
-                    String msg = "[ALERTA] Zona " + zona->getNome() + " violada " + " (" + sensor->getNome() + ").";
+                    String msg = "[ALERTA] Zona " + zona->getNome() + " violada (" + sensor->getNome() + ").";
                     registrarEvento(msg);
                     sensor->setAlertaEmitido(true);
-                    if (sirene)
-                        sirene->ativar(sensor);
+                    if (sirene) sirene->ativar(sensor);
                 }
             }
         }
     }
 
-    if (sirene)
-        sirene->atualizar();
+    if (sirene) sirene->atualizar();
 }
 
-// Verifica se uma zona está na lista de zonas ativas
 bool Alarme::zonaEstaAtiva(const String &nomeZona) const
 {
-    for (const auto &z : zonasAtivas)
-    {
-        if (z == nomeZona)
-            return true;
-    }
+    for (const auto &z : zonasAtivas) if (z == nomeZona) return true;
     return false;
 }
 
-// Getters e setters
 Alarme::Estado Alarme::getEstado() const { return estadoAtual; }
-Alarme::Modo Alarme::getModo() const { return modoAtual; }
+Alarme::Modo   Alarme::getModo()   const { return modoAtual; }
+
 void Alarme::setModo(Modo m)
 {
     modoAtual = m;
+
+    // no AUTOMÁTICO, por padrão, considera todas as zonas ativas
     if (modoAtual == Modo::AUTOMATICO)
     {
         zonasAtivas.clear();
-        for (auto zona : zonas)
-        {
-            zonasAtivas.push_back(zona->getNome());
-        }
+        for (auto zona : zonas) zonasAtivas.push_back(zona->getNome());
     }
 }
 
-const std::vector<String> &Alarme::getZonasAtivas() const { return zonasAtivas; }
+const std::vector<String>& Alarme::getZonasAtivas() const { return zonasAtivas; }
+const std::vector<Zona*>&  Alarme::getZonas() const { return zonas; }
 
-// Imprime no terminal o estado atual do sistema
 void Alarme::imprimirDados() const
 {
     Serial.println("\n--- Dados do Alarme ---");
-
-    Serial.print("Estado: ");
-    Serial.println(estadoAtual == Estado::DESARMADO ? "DESARMADO" : "ARMADO");
-
-    Serial.print("Modo: ");
-    Serial.println(modoAtual == Modo::MANUAL ? "MANUAL" : "AUTOMATICO");
+    Serial.print("Estado: "); Serial.println(estadoAtual == Estado::DESARMADO ? "DESARMADO" : "ARMADO");
+    Serial.print("Modo: ");   Serial.println(modoAtual == Modo::MANUAL ? "MANUAL" : "AUTOMATICO");
 
     Serial.print("Zonas Ativas: ");
-    if (zonasAtivas.empty())
-    {
-        Serial.println("Nenhuma");
-    }
-    else
-    {
-        for (const String &zona : zonasAtivas)
-        {
-            Serial.print(zona + ", ");
-        }
-        Serial.println();
-    }
-
-    Serial.print("Zonas Monitoradas: ");
-    if (zonas.empty())
-    {
-        Serial.println("Nenhuma");
-    }
-    else
-    {
-        for (auto zona : zonas)
-        {
-            Serial.print(zona->getNome() + ", ");
-        }
-        Serial.println();
-    }
-
-    Serial.print("Sirene Configurada: ");
-    Serial.println(sirene != nullptr ? "Sim" : "Não");
+    if (zonasAtivas.empty()) Serial.println("Nenhuma");
+    else { for (auto &z : zonasAtivas) Serial.print(z + ", "); Serial.println(); }
 
     Serial.println("------------------------\n");
 }
 
-// Controle de agendamento automático
+void Alarme::limparZonas()
+{
+    for (auto zona : zonas) delete zona;
+    zonas.clear();
+}
+
+// =================== AUTO SCHEDULE ===================
+// Regra: se hora NÃO for confiável (sem NTP ou ano==1970), o modo automático vira “sempre armado”.
 void checkAutoSchedule(Alarme &alarme)
 {
-    if (alarme.getModo() != Alarme::Modo::AUTOMATICO)
-        return;
+    if (alarme.getModo() != Alarme::Modo::AUTOMATICO) return;
 
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo))
+    const bool temHora = getLocalTime(&timeinfo);
+
+    const int ano = temHora ? (timeinfo.tm_year + 1900) : 1970;
+
+    // Se sem hora OU ano==1970 => sempre armado
+    if (!temHora || ano == 1970)
     {
         if (alarme.getEstado() != Alarme::Estado::ARMADO)
         {
-            Serial.println("[AVISO] Sem hora válida — ativando alarme por contingência");
+            Serial.println("[AUTO] Hora não confiável (1970/sem NTP) => mantendo SEMPRE ARMADO");
             alarme.armar(todasZonas);
-            registrarEvento("[INFO] Alarme armado automaticamente por falta de internet/hora");
+            registrarEvento("[AUTO] Hora não confiável => alarme mantido sempre armado");
         }
         return;
     }
 
-    int hour = timeinfo.tm_hour;
-    int weekday = timeinfo.tm_wday;
+    // Hora confiável: aplica agenda normal
+    const int hour    = timeinfo.tm_hour;
+    const int weekday = timeinfo.tm_wday; // 0=dom, 1=seg...6=sab
 
-    int armHour = (weekday >= 1 && weekday <= 5) ? ARM_HOUR_WEEKDAY : ARM_HOUR_WEEKEND;
-    int disarmHour = (weekday >= 1 && weekday <= 5) ? DISARM_HOUR_WEEKDAY : DISARM_HOUR_WEEKEND;
+    const int armHour    = (weekday >= 1 && weekday <= 5) ? ARM_HOUR_WEEKDAY    : ARM_HOUR_WEEKEND;
+    const int disarmHour = (weekday >= 1 && weekday <= 5) ? DISARM_HOUR_WEEKDAY : DISARM_HOUR_WEEKEND;
 
-    bool dentroDaJanela = (hour >= armHour || hour < disarmHour);
+    const bool dentroDaJanela = (hour >= armHour || hour < disarmHour);
 
     if (dentroDaJanela && alarme.getEstado() != Alarme::Estado::ARMADO)
     {
@@ -206,18 +161,15 @@ void checkAutoSchedule(Alarme &alarme)
     }
 }
 
-// Reinício diário programado (corrigido)
+// =================== DAILY RESTART ===================
 void checkDailyRestart()
 {
     if (!RESTART_CONFIG) return;
 
     time_t now = time(nullptr);
 
-    // 1) Só reinicia se a hora for válida (evita 1970 / sem NTP)
-    if (now < 1700000000) {
-        // Serial.println("[REINICIO] Hora inválida (sem NTP), não reiniciando.");
-        return;
-    }
+    // se hora não confiável (ex: 1970), não reinicia por agenda
+    if (now < 1700000000) return;
 
     struct tm timeinfo;
     localtime_r(&now, &timeinfo);
@@ -225,36 +177,18 @@ void checkDailyRestart()
     const int horaAtual   = timeinfo.tm_hour;
     const int minutoAtual = timeinfo.tm_min;
 
-    // 2) Identificador de dia robusto (não repete no mês)
-    //    "epoch day": número de dias desde 1970-01-01
     const int diaId = (int)(now / 86400);
-
-    // 3) (Opcional, mas bom) janela de 2 minutos pra evitar reinício em qualquer minuto da hora
     const bool dentroDaJanela = (horaAtual == HORA_RESTART) && (minutoAtual <= 2);
 
-    // 4) Reinicia uma vez por dia
     if (dentroDaJanela && diaId != ultimoDiaReinicio)
     {
         Serial.println("[INFO] Reiniciando o sistema conforme horário configurado...");
         registrarEvento("[REINICIO] Reiniciando o sistema conforme horário configurado...");
 
-        // Atualiza RAM + FS antes de reiniciar (evita loop de reboot)
         ultimoDiaReinicio = diaId;
         salvarUltimoDiaReinicio(diaId);
 
         delay(2000);
         ESP.restart();
     }
-}
-const std::vector<Zona *> &Alarme::getZonas() const
-{
-    return zonas;
-}
-void Alarme::limparZonas()
-{
-    for (auto zona : zonas)
-    {
-        delete zona; // libera memória
-    }
-    zonas.clear();
 }

@@ -8,7 +8,7 @@
 
 #include "web_server_handlers.h"
 #include "system_config.h"
-#include "web_server.h"   // deve declarar: extern ESP8266WebServer server;
+#include "web_server.h" // deve declarar: extern ESP8266WebServer server;
 #include "ota_manager.h"
 #include "alarme.h"
 #include "zona.h"
@@ -16,19 +16,19 @@
 #include "sirene.h"
 
 // ================== CONFIGS ==================
-static const char* HOSTNAME     = "alarme";
-static const char* WIFI_AP_SSID = "ConfigurarESP";
-static const char* WIFI_AP_PASS = "12345678";
-static const char* OTA_USER     = "admin";
-static const char* OTA_PASS     = "1234";
+static const char *HOSTNAME = "alarme";
+static const char *WIFI_AP_SSID = "ConfigurarESP";
+static const char *WIFI_AP_PASS = "12345678";
+static const char *OTA_USER = "admin";
+static const char *OTA_PASS = "1234";
 
-static const unsigned long INTERVALO_ALARME_MS           = 100;
-static const unsigned long WIFI_RECONNECT_INTERVAL_MS    = 10UL * 1000UL;       // 10s
-static const unsigned long WIFI_RESTART_AFTER_MS         = 5UL * 60UL * 1000UL; // 5 min
-static const unsigned long NTP_RETRY_INTERVAL_MS         = 5UL * 60UL * 1000UL; // 5 min
+static const unsigned long INTERVALO_ALARME_MS = 100;
+static const unsigned long WIFI_RECONNECT_INTERVAL_MS = 10UL * 1000UL;  // 10s
+static const unsigned long WIFI_RESTART_AFTER_MS = 5UL * 60UL * 1000UL; // 5 min
+static const unsigned long NTP_RETRY_INTERVAL_MS = 5UL * 60UL * 1000UL; // 5 min
 
 // WiFi hardening (mínimo viável #2)
-static const uint8_t WIFI_RESET_SUAVE_APOS_FALHAS = 3;  // após 3 tentativas, faz disconnect(false)
+static const uint8_t WIFI_RESET_SUAVE_APOS_FALHAS = 3; // após 3 tentativas, faz disconnect(false)
 
 // ================== GLOBAIS ==================
 Alarme alarme;
@@ -53,9 +53,9 @@ static uint8_t falhasReconexaoWiFi = 0;
 
 // Carrega sensores do arquivo JSON e retorna ponteiros
 // MELHORIA: faz parse direto do File (stream), sem buffer grande na RAM
-std::vector<Sensor*> carregarSensoresDeJSON(const char* path)
+std::vector<Sensor *> carregarSensoresDeJSON(const char *path)
 {
-    std::vector<Sensor*> sensores;
+    std::vector<Sensor *> sensores;
 
     File file = LittleFS.open(path, "r");
     if (!file)
@@ -83,16 +83,16 @@ std::vector<Sensor*> carregarSensoresDeJSON(const char* path)
 
     for (JsonObject obj : doc.as<JsonArray>())
     {
-        String nome    = obj["nome"] | "";
+        String nome = obj["nome"] | "";
         String tipoStr = obj["tipo"] | "";
         String pinoStr = obj["pino"] | "";
-        String zona    = obj["zona"] | "";
-        bool ativo     = obj["ativo"] | true;
+        String zona = obj["zona"] | "";
+        bool ativo = obj["ativo"] | true;
 
         int pino = resolverPino(pinoStr);
         Sensor::Tipo tipo = Sensor::tipoFromString(tipoStr);
 
-        Sensor* s = new Sensor(nome, tipo, pino, zona, ativo);
+        Sensor *s = new Sensor(nome, tipo, pino, zona, ativo);
         sensores.push_back(s);
     }
 
@@ -100,9 +100,9 @@ std::vector<Sensor*> carregarSensoresDeJSON(const char* path)
 }
 
 // Agrupa sensores por zona
-std::map<String, Zona*> agruparSensoresPorZona(const std::vector<Sensor*>& sensores)
+std::map<String, Zona *> agruparSensoresPorZona(const std::vector<Sensor *> &sensores)
 {
-    std::map<String, Zona*> zonas;
+    std::map<String, Zona *> zonas;
 
     for (auto sensor : sensores)
     {
@@ -120,10 +120,11 @@ std::map<String, Zona*> agruparSensoresPorZona(const std::vector<Sensor*>& senso
 }
 
 // Extrai os nomes das zonas
-std::vector<String> obterNomesZonas(const std::map<String, Zona*>& zonas)
+std::vector<String> obterNomesZonas(const std::map<String, Zona *> &zonas)
 {
     std::vector<String> nomes;
-    for (auto& par : zonas) nomes.push_back(par.first);
+    for (auto &par : zonas)
+        nomes.push_back(par.first);
     return nomes;
 }
 
@@ -209,6 +210,17 @@ static void onWifiDesconectado()
     wifiEstavaConectado = false;
     Serial.println("[WIFI] Desconectado");
 }
+static void setHoraSentinela1970()
+{
+    // 1970-01-01 00:00:00 UTC (ou local; aqui é "bruto")
+    // No ESP8266/Arduino, isso geralmente ajusta o relógio interno.
+    timeval tv;
+    tv.tv_sec = 0; // epoch 0
+    tv.tv_usec = 0;
+    settimeofday(&tv, nullptr);
+
+    Serial.println("[TEMPO] Hora sentinela aplicada: 1970 (tempo não confiável)");
+}
 
 void configurarSistema()
 {
@@ -222,7 +234,7 @@ void configurarSistema()
 
     alarme.definirSirene(&sirene);
 
-    for (auto& par : zonas)
+    for (auto &par : zonas)
     {
         alarme.adicionarZona(par.second);
     }
@@ -282,6 +294,10 @@ void setup()
 
     // 6) NTP inicial
     ntpOk = configurarHorarioComTimeout(15000);
+    if (!ntpOk)
+    {
+        setHoraSentinela1970();
+    }
     proximaTentativaNtpMs = millis() + NTP_RETRY_INTERVAL_MS;
 
     Serial.println("=== SETUP CONCLUÍDO ===");
@@ -368,6 +384,10 @@ void loop()
     {
         proximaTentativaNtpMs = now + NTP_RETRY_INTERVAL_MS;
         ntpOk = configurarHorarioComTimeout(5000);
+        if (!ntpOk)
+        {
+            setHoraSentinela1970();
+        }
     }
 
     yield();
