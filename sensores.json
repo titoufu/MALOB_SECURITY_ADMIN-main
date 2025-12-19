@@ -1,0 +1,23 @@
+[
+  {
+    "nome": "Ambiente",
+    "tipo": "PIR",
+    "pino": "D0",
+    "zona": "Reciclagem",
+    "ativo": true
+  },
+  {
+    "nome": "Ambiente",
+    "tipo": "PIR",
+    "pino": "D1",
+    "zona": "Triagem",
+    "ativo": true
+  },
+  {
+    "nome": "Porta&Janela",
+    "tipo": "PIR",
+    "pino": "D2",
+    "zona": "Triagem",
+    "ativo": true
+  }
+]

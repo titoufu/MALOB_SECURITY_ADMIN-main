@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Lar Espírita Maria Lobato de Freitas</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header img {
+      height: 80px;
+    }
+
+    h1 {
+      color: #444;
+    }
+
+    form {
+      max-width: 300px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+    #loginStatus {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="/LOGO_OTIMIZADO.png" alt="Logo">
+    <h1>Lar Espírita Maria Lobato de Freitas</h1>
+  </header>
+
+  <form id="loginForm">
+    <h2>Login do Usuário</h2>
+    <input type="text" id="usuario" placeholder="Usuário" required>
+    <input type="password" id="senha" placeholder="Senha" required>
+    <button type="submit">Entrar</button>
+    <div id="loginStatus"></div>
+  </form>
+
+  <footer>
+    <p>“Promover o ser humano em seu desenvolvimento moral e espiritual, acolhendo-o fraternalmente, propiciando o
+      estudo, a divulgação e a prática da doutrina espírita”</p>
+  </footer>
+
+</body>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const usuario = document.getElementById('usuario').value;
+    const senha = document.getElementById('senha').value;
+    const msg = document.getElementById('loginStatus');
+
+    // Limpa mensagens anteriores
+    msg.textContent = '';
+    msg.style.color = '';
+
+    try {
+      // 1. Formato de envio que o backend espera
+      const formData = new URLSearchParams();
+      formData.append('usuario', usuario);
+      formData.append('senha', senha);
+
+      const res = await fetch('/verifica_login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData
+      });
+
+      // 2. Verificação robusta da resposta
+      const result = await res.json().catch(() => ({}));
+
+      if (res.ok && result.ok) {
+        // 3. Armazena credenciais de forma segura
+        localStorage.setItem("usuario", usuario);
+        localStorage.setItem("senha", senha); // Manter compatibilidade
+
+        // 4. Redireciona com pequeno delay
+        setTimeout(() => {
+          window.location.href = '/index';
+        }, 100);
+      } else {
+        throw new Error(result.erro || "Credenciais inválidas");
+      }
+    } catch (error) {
+      console.error('Erro no login:', error);
+      msg.style.color = 'red';
+      msg.textContent = error.message || "Erro durante o login";
+
+      // Limpa credenciais inválidas
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("senha");
+    }
+  });
+
+  // Verificação inicial para usuários já logados
+  (async () => {
+    if (localStorage.getItem("usuario") && localStorage.getItem("senha")) {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('usuario', localStorage.getItem("usuario"));
+        formData.append('senha', localStorage.getItem("senha"));
+
+        const res = await fetch('/verifica_login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
+        });
+
+        if (res.ok) {
+          window.location.href = '/index';
+        }
+      } catch (error) {
+        console.log('Sessão inválida');
+      }
+    }
+  })();
+</script>
+
+</html>

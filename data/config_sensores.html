@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administração - Configurar Sensores</title>
+    <style>
+        :root {
+            --primary: #28a745;
+            --secondary: #6c757d;
+            --dark: #343a40;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        #msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #msg.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #msg.success {
+            background-color: #28a745;
+        }
+
+        #msg.error {
+            background-color: #dc3545;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem auto;
+            max-width: 600px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.2rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: #fff;
+            /* From config_sensores1.html */
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+            border: 1px solid #ccc;
+            /* From config_sensores1.html */
+        }
+
+        td input,
+        td select {
+            /* Modified from admin.html to include select */
+            width: 95%;
+            /* Adjusted from admin.html input[type="text"] to 95% */
+            padding: 5px;
+            /* From config_sensores1.html */
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            margin: 0.3rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .center-buttons {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        footer {
+            background-color: #e9ebee;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: center;
+            background: var(--card-bg);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .header-container {
+            display: grid;
+            /* Mude a ordem aqui: auto para a esquerda (logo) e 1fr para a direita (informações) */
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            /* Alinha os itens verticalmente ao centro */
+            max-width: 960px;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .logo-box {
+            display: flex;
+            justify-content: center;
+            /* Centraliza a imagem da logo dentro da sua própria caixa */
+            align-items: center;
+        }
+
+        .logo-box img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .instituicao-info {
+            text-align: center;
+            color: #000;
+            /* Garante que o texto dentro desta div esteja centralizado */
+        }
+
+        .instituicao-info h1 {
+            font-size: 18px;
+            margin: 0 0 4px;
+            color:#000 ;
+        }
+
+        .instituicao-info p {
+            margin: 2px 0;
+            font-size: 13px;
+            color:#000;
+
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-box">
+                <img src="/LOGO_OTIMIZADO.png" alt="Logo Maria Lobato" />
+            </div>
+            <div class="instituicao-info">
+                <h1>Lar Espírita Maria Lobato de Freitas</h1>
+                <p>Rua Ângelo Cunha, 25 – B. São Jorge</p>
+                <p>Uberlândia / MG – CEP: 38410-206</p>
+                <p>Email: le.maria.lobato@gmail.com </p>
+                <p>Tel:3219-2316 - CNPJ:19.352.764/0001-74</p>
+            </div>
+        </div>
+    </header>
+    <div id="msg"></div>
+
+    <div id="login-section" class="card">
+        <h2>Login do Administrador</h2>
+        <input id="admin-pass" type="password" placeholder="Senha" />
+        <button class="btn btn-primary" onclick="realizarLogin()">Entrar</button>
+    </div>
+
+    <div id="admin-section" class="card" style="display:none;">
+        <h2>Cadastro de Sensores</h2>
+
+        <table id="tabelaSensores">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Pino</th>
+                    <th>Zona</th>
+                    <th>Ativo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <button class="btn btn-primary" onclick="adicionarSensor()">Adicionar Sensor</button>
+        <button class="btn btn-primary" onclick="salvarSensores()">Salvar Sensores</button>
+    </div>
+    <div id="horarios-section" class="card" style="display:none;">
+        <h2>Horários de Funcionamento do Alarme</h2>
+        <form id="horarios-form">
+            <fieldset>
+                <legend>Segunda a Sexta</legend>
+                <div class="horario-linha">
+                    <div class="horario-campo">
+                        <label for="arm_hour_weekday">Hora para Armar:</label>
+                        <input type="number" id="arm_hour_weekday" min="0" max="23">
+                    </div>
+                    <div class="horario-campo">
+                        <label for="disarm_hour_weekday">Hora para Desarmar:</label>
+                        <input type="number" id="disarm_hour_weekday" min="0" max="23">
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Fins de Semana</legend>
+                <div class="horario-linha">
+                    <div class="horario-campo">
+                        <label for="arm_hour_weekend">Hora para Armar:</label>
+                        <input type="number" id="arm_hour_weekend" min="0" max="23">
+                    </div>
+                    <div class="horario-campo">
+                        <label for="disarm_hour_weekend">Hora para Desarmar:</label>
+                        <input type="number" id="disarm_hour_weekend" min="0" max="23">
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Configuração de Reinício Diário</legend>
+                <div class="horario-linha">
+                    <div class="horario-campo">
+                        <label for="hora_restart">Hora do Reinício:</label>
+                        <input type="number" id="hora_restart" min="0" max="23">
+                    </div>
+                    <div class="horario-campo" style="margin-top: 30px;">
+                        <label><input type="checkbox" id="restart_config"> Habilitar reinício automático</label>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        <div class="center-buttons">
+            <button id="save-all-btn" class="btn btn-primary">Salvar Horários</button>
+            <button type="button" class="btn btn-secondary" onclick="location.reload()">Cancelar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p><em>Nossa Missão: "Promover o ser humano em seu desenvolvimento moral e espiritual, acolhendo-o
+                fraternalmente,
+                propiciando o estudo, a divulgação e a prática da doutrina espírita."</em></p>
+    </footer>
+
+
+
+    <script>
+        let adminSenhaAtual = "";
+        const msgDiv = document.getElementById('msg');
+
+        function showMessage(text, type) {
+            msgDiv.textContent = text;
+            msgDiv.className = 'show';
+            if (type) msgDiv.classList.add(type);
+            setTimeout(() => msgDiv.classList.remove('show'), 4000);
+        }
+
+        async function realizarLogin() {
+            const senha = document.getElementById("admin-pass").value.trim();
+
+            if (!senha) {
+                showMessage("Digite a senha", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `senha=${encodeURIComponent(senha)}`
+                });
+
+                if (response.ok) {
+                    adminSenhaAtual = senha;
+                    mostrarInterfaceAdmin();
+                    carregarSensores();
+                    carregarHorarios();
+                    showMessage("Login realizado com sucesso", "success");
+                } else {
+                    showMessage("Senha incorreta", "error");
+                }
+            } catch (e) {
+                console.error("Erro ao realizar login:", e);
+                showMessage("Erro de conexão com o servidor", "error");
+            }
+        }
+
+        function mostrarInterfaceAdmin() {
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("admin-section").style.display = "block";
+            document.getElementById("horarios-section").style.display = "block";
+        }
+
+        // ========= Sensores =========
+        let sensores = [];
+
+        async function carregarSensores() {
+            try {
+                const resp = await fetch('/sensores.json');
+                sensores = await resp.json();
+                renderTabela();
+            } catch (e) {
+                showMessage('Erro ao carregar sensores', 'error');
+            }
+        }
+
+        function renderTabela() {
+            const tbody = document.querySelector('#tabelaSensores tbody');
+            tbody.innerHTML = '';
+            sensores.forEach((s, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td><input value="${s.nome}" onchange="sensores[${i}].nome = this.value"></td>
+            <td>
+                <select onchange="sensores[${i}].tipo = this.value">
+                    <option value="PIR" ${s.tipo === 'PIR' ? 'selected' : ''}>PIR</option>
+                    <option value="REED" ${s.tipo === 'REED' ? 'selected' : ''}>REED</option>
+                </select>
+            </td>
+            <td>
+                <select onchange="sensores[${i}].pino = this.value">
+                    ${['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'].map(p =>
+                    `<option value="${p}" ${s.pino === p ? 'selected' : ''}>${p}</option>`).join('')}
+                </select>
+            </td>
+            <td><input value="${s.zona}" onchange="sensores[${i}].zona = this.value"></td>
+            <td><input type="checkbox" ${s.ativo ? 'checked' : ''} onchange="sensores[${i}].ativo = this.checked"></td>
+            <td class="actions">
+                <button class="btn btn-secondary" onclick="removerSensor(${i})">Remover</button>
+            </td>
+        `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function adicionarSensor() {
+            sensores.push({ nome: '', tipo: 'PIR', pino: 'D0', zona: '', ativo: true });
+            renderTabela();
+        }
+
+        function removerSensor(index) {
+            sensores.splice(index, 1);
+            renderTabela();
+        }
+
+        async function salvarSensores() {
+            const resp = await fetch('/sensores.json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sensores)
+            });
+
+            if (resp.ok) {
+                showMessage('Sensores salvos com sucesso!', 'success');
+                // ✅ NOVO: Chama o backend para reconfigurar o sistema
+                await fetch('/recarregar_dados', { method: 'POST' });
+            } else {
+                showMessage('Erro ao salvar sensores!', 'error');
+            }
+        }
+
+        // ========= Horários =========
+        async function carregarHorarios() {
+            try {
+                const resp = await fetch('/horarios.json');
+                if (!resp.ok) throw new Error("Erro ao carregar");
+                const data = await resp.json();
+
+                document.getElementById("arm_hour_weekday").value = data.ARM_HOUR_WEEKDAY ?? "";
+                document.getElementById("disarm_hour_weekday").value = data.DISARM_HOUR_WEEKDAY ?? "";
+                document.getElementById("arm_hour_weekend").value = data.ARM_HOUR_WEEKEND ?? "";
+                document.getElementById("disarm_hour_weekend").value = data.DISARM_HOUR_WEEKEND ?? "";
+                document.getElementById("hora_restart").value = data.HORA_RESTART ?? "";
+                document.getElementById("restart_config").checked = data.RESTART_CONFIG ?? false;
+
+            } catch (e) {
+                console.error("Erro ao carregar horários:", e);
+                showMessage("Erro ao carregar horários", "error");
+            }
+        }
+
+        async function salvarHorarios() {
+            const dados = {
+                ARM_HOUR_WEEKDAY: parseInt(document.getElementById("arm_hour_weekday").value),
+                DISARM_HOUR_WEEKDAY: parseInt(document.getElementById("disarm_hour_weekday").value),
+                ARM_HOUR_WEEKEND: parseInt(document.getElementById("arm_hour_weekend").value),
+                DISARM_HOUR_WEEKEND: parseInt(document.getElementById("disarm_hour_weekend").value),
+                HORA_RESTART: parseInt(document.getElementById("hora_restart").value),
+                RESTART_CONFIG: document.getElementById("restart_config").checked
+            };
+
+            const resp = await fetch('/horarios.json', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            if (resp.ok) {
+                showMessage("Horários salvos com sucesso!", "success");
+                // ✅ NOVO: Chama o backend para reconfigurar o sistema
+                await fetch('/recarregar_dados', { method: 'POST' });
+
+            } else {
+                showMessage("Erro ao salvar horários!", "error");
+            }
+        }
+
+        // Conectar botão ao script
+        document.addEventListener("DOMContentLoaded", () => {
+            const salvarBtn = document.getElementById("save-all-btn");
+            if (salvarBtn) {
+                salvarBtn.addEventListener("click", salvarHorarios);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

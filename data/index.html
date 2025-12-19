@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Lar Espírita Maria Lobato de Freitas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --primary: #1976d2;
+      --danger: #d32f2f;
+      --bg: #f2f4f8;
+      --card-bg: #ffffff;
+      --text: #333;
+      --radius: 14px;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--card-bg);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      z-index: 10;
+    }
+
+    header img {
+      max-width: 80px;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    }
+
+    header h1 {
+      margin: 10px 0 0;
+      font-size: 18px;
+    }
+
+    .container {
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 17px;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: white;
+      transition: 0.2s ease;
+    }
+
+    .btn-armar {
+      background-color: var(--primary);
+    }
+
+    .btn-desarmar {
+      background-color: var(--danger);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-modo {
+      background-color: #666;
+      color: #fff;
+    }
+
+    .btn-modo.automatico {
+      background-color: #000;
+    }
+
+    .btn-modo.manual {
+      background-color: #05974e;
+    }
+
+    .zona-lista {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .zona-item {
+      background: #f6f6f6;
+      border-radius: var(--radius);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .zona-item input {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    .flex-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .flex-cards .card {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .status-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 15px;
+      padding: 8px;
+    }
+
+    .status-panel div {
+      padding: 4px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background: #f1f1f1;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin: 20px 0;
+      padding: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .flex-cards {
+        flex-direction: column;
+      }
+    }
+
+    header {
+      display: flex;
+      justify-content: center;
+      background: var(--card-bg);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    .header-container {
+      display: grid;
+      /* Mude a ordem aqui: auto para a esquerda (logo) e 1fr para a direita (informações) */
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      /* Alinha os itens verticalmente ao centro */
+      max-width: 960px;
+      width: 100%;
+      gap: 20px;
+    }
+
+    .logo-box {
+      display: flex;
+      justify-content: center;
+      /* Centraliza a imagem da logo dentro da sua própria caixa */
+      align-items: center;
+    }
+
+    .logo-box img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .instituicao-info {
+      text-align: center;
+      /* Garante que o texto dentro desta div esteja centralizado */
+    }
+
+    .instituicao-info h1 {
+      font-size: 18px;
+      margin: 0 0 4px;
+    }
+
+    .instituicao-info p {
+      margin: 2px 0;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo-box">
+        <img src="/LOGO_OTIMIZADO.png" alt="Logo Maria Lobato" />
+      </div>
+      <div class="instituicao-info">
+        <h1>Lar Espírita Maria Lobato de Freitas</h1>
+        <p>Rua Ângelo Cunha, 25 – B. São Jorge</p>
+        <p>Uberlândia / MG – CEP: 38410-206</p>
+        <p>Email: le.maria.lobato@gmail.com </p>
+        <p>Tel:3219-2316 - CNPJ:19.352.764/0001-74</p>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <div class="card">
+      <button id="modoAuto" class="btn btn-modo">⏱ Modo Automático</button>
+    </div>
+    <div class="card">
+      <button id="toggleAlarme" class="btn">⏳ Carregando...</button>
+    </div>
+    <div class="card">
+      <h2>📊 Status Atual</h2>
+      <div id="dados-alarme" class="status-panel">
+        <div><strong>Estado:</strong> <span id="status-estado">...</span></div>
+        <div><strong>Modo:</strong> <span id="status-modo">...</span></div>
+        <div><strong>Zonas Ativas:</strong> <span id="status-zonas">...</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="flex-cards">
+    <div class="card">
+      <h2>🛡️ Zonas Monitoradas</h2>
+      <div id="zonas-container" class="zona-lista">
+        <!-- Zonas serão carregadas dinamicamente aqui -->
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Últimos Eventos</h2>
+    <table id="historico">
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Evento</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+
+  <footer>
+    <em>"Nossa Missão: Promover o ser humano em seu desenvolvimento moral e espiritual, acolhendo-o fraternalmente,
+      propiciando o estudo, a divulgação e a prática da doutrina espírita."</em>
+  </footer>
+
+  <script>
+    let estadoAlarme = false;
+    let modoAutomatico = false;
+    let zonasDisponiveis = [];
+    let usuarioInteragindo = false;
+
+    const btnToggle = document.getElementById('toggleAlarme');
+    const btnModo = document.getElementById('modoAuto');
+    const zonasContainer = document.getElementById('zonas-container');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!verificarAutenticacao()) return;
+      await inicializarInterface();
+      configurarEventos();
+    });
+
+    async function verificarAutenticacao() {
+      const usuario = localStorage.getItem("usuario");
+      const senha = localStorage.getItem("senha");
+      if (!usuario || !senha) {
+        window.location.href = "/painel.html";
+        return false;
+      }
+
+      const res = await fetch('/verifica_login', {
+        method: 'POST',
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ usuario, senha })
+      });
+
+      if (!res.ok) {
+        localStorage.clear();
+        window.location.href = "/painel.html";
+        return false;
+      }
+
+      return true;
+    }
+
+    async function inicializarInterface() {
+      try {
+        await atualizarStatus();
+        await carregarHistorico();
+        setInterval(atualizarStatus, 5000); // Atualiza status a cada 5 segundos
+        setInterval(carregarHistorico, 10000);
+
+        // Configura listeners para detectar interação do usuário
+        zonasContainer.addEventListener('mousedown', () => {
+          usuarioInteragindo = true;
+        });
+
+        zonasContainer.addEventListener('mouseup', () => {
+          setTimeout(() => { usuarioInteragindo = false; }, 3000);
+        });
+
+        btnToggle.addEventListener('mousedown', () => {
+          usuarioInteragindo = true;
+        });
+      } catch (e) {
+        console.error("Erro na inicialização:", e);
+        btnToggle.textContent = "⚠️ Erro";
+      }
+    }
+
+    function configurarEventos() {
+      btnToggle.addEventListener('click', alternarEstadoAlarme);
+      btnModo.addEventListener('click', alternarModo);
+    }
+
+    function renderizarZonas(zonasAtivas) {
+      // Salva o estado atual dos checkboxes antes de recriá-los
+      const estadosAtuais = {};
+      zonasDisponiveis.forEach(zona => {
+        const zonaId = `zona_${zona.toLowerCase().replace(/\s+/g, '_')}`;
+        const checkbox = document.getElementById(zonaId);
+        if (checkbox) {
+          estadosAtuais[zonaId] = checkbox.checked;
+        }
+      });
+
+      zonasContainer.innerHTML = '';
+
+      zonasDisponiveis.forEach(zona => {
+        const zonaId = `zona_${zona.toLowerCase().replace(/\s+/g, '_')}`;
+        const isChecked = estadosAtuais[zonaId] !== undefined
+          ? estadosAtuais[zonaId] // Preserva seleção do usuário
+          : zonasAtivas.includes(zona); // Usa estado do servidor se não houver alteração local
+
+        const label = document.createElement('label');
+        label.className = 'zona-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = zonaId;
+        checkbox.checked = isChecked;
+        checkbox.disabled = modoAutomatico;
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(zona));
+
+        zonasContainer.appendChild(label);
+      });
+    }
+
+    async function alternarEstadoAlarme() {
+      if (modoAutomatico) {
+        alert("Modo automático ativo - operação manual desabilitada");
+        return;
+      }
+
+      try {
+        const zonas = obterZonasAtivas();
+        const endpoint = estadoAlarme ? "/desarma" : "/arma";
+        const response = await enviarComando(endpoint, zonas);
+
+        if (!response.ok) {
+          const msg = await response.text();
+          if (response.status === 403 || msg.includes("negado")) {
+            alert("Acesso negado. Faça login novamente.");
+            localStorage.clear();
+            window.location.href = "/painel.html";
+            return;
+          }
+          throw new Error(msg);
+        }
+
+        await atualizarStatus();
+        usuarioInteragindo = false; // Libera para atualizações automáticas
+
+      } catch (e) {
+        console.error("Erro ao alternar alarme:", e);
+        alert("Erro ao alternar alarme: " + e.message);
+        await atualizarStatus();
+      }
+    }
+
+    async function alternarModo() {
+      btnModo.disabled = true;
+      const novoModo = !modoAutomatico;
+
+      try {
+        const zonas = novoModo ? zonasDisponiveis : obterZonasAtivas();
+        const response = await enviarComando('/modo', zonas, {
+          manual: novoModo ? 'false' : 'true'
+        });
+
+        if (!response.ok) {
+          const msg = await response.text();
+          if (response.status === 403 || msg.includes("negado")) {
+            alert("Acesso negado. Faça login novamente.");
+            localStorage.clear();
+            window.location.href = "/painel.html";
+            return;
+          }
+          throw new Error(msg);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await atualizarStatus();
+        usuarioInteragindo = false; // Libera para atualizações automáticas
+
+      } catch (e) {
+        console.error("Erro ao alterar modo:", e);
+        alert("Erro ao alterar modo: " + e.message);
+        await atualizarStatus();
+      } finally {
+        btnModo.disabled = false;
+      }
+    }
+
+    function atualizarEstadoBotao() {
+      btnToggle.disabled = modoAutomatico;
+      btnToggle.style.opacity = modoAutomatico ? 0.4 : 1;
+      btnToggle.textContent = estadoAlarme ? "🔓 Desarmar" : "🔐 Armar";
+      btnToggle.className = estadoAlarme ? "btn btn-desarmar" : "btn btn-armar";
+
+      btnModo.textContent = modoAutomatico ? "⏱ Modo Automático" : "🔧 Modo Manual";
+      btnModo.classList.toggle("automatico", modoAutomatico);
+      btnModo.classList.toggle("manual", !modoAutomatico);
+    }
+
+    async function atualizarStatus() {
+      if (usuarioInteragindo) return;
+
+      try {
+        const res = await fetch('/status.json?t=' + Date.now());
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Verifica se houve mudanças relevantes antes de atualizar
+        const alarmeMudou = estadoAlarme !== (data.estado_alarme === 'ARMADO');
+        const modoMudou = modoAutomatico !== (data.modo_operacao === "AUTOMATICO");
+        const zonasMudaram = !arraysIguais(zonasDisponiveis, data.zonas?.map(z => z.nome) || []);
+
+        if (alarmeMudou || modoMudou || zonasMudaram) {
+          estadoAlarme = data.estado_alarme === 'ARMADO';
+          modoAutomatico = data.modo_operacao === "AUTOMATICO";
+
+          if (data.zonas && data.zonas.length > 0) {
+            zonasDisponiveis = data.zonas.map(z => z.nome);
+          }
+
+          document.getElementById("status-estado").textContent = data.estado_alarme;
+          document.getElementById("status-modo").textContent = data.modo_operacao;
+          document.getElementById("status-zonas").textContent = data.zonas_ativas.join(', ') || 'Nenhuma';
+
+          if (zonasDisponiveis.length > 0) {
+            renderizarZonas(data.zonas_ativas || []);
+          }
+
+          atualizarEstadoBotao();
+        }
+
+      } catch (e) {
+        console.error("Erro ao atualizar status:", e);
+        btnToggle.textContent = "⚠️ Erro";
+      }
+    }
+
+    // Função auxiliar para comparar arrays
+    function arraysIguais(a, b) {
+      return Array.isArray(a) && Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((val, index) => val === b[index]);
+    }
+
+    async function carregarHistorico() {
+      try {
+        const res = await fetch('/historico.json');
+        const eventos = await res.json();
+        const tbody = document.querySelector('#historico tbody');
+        tbody.innerHTML = '';
+        eventos.reverse().forEach(e => {
+          const row = tbody.insertRow();
+          const dataHora = new Date(e.timestamp * 1000);
+          row.insertCell(0).textContent = dataHora.toLocaleString();
+          row.insertCell(1).textContent = e.evento;
+          if ((Date.now() / 1000) - e.timestamp <= 3600 * 8) {
+            row.style.backgroundColor = '#ffe8e8';
+            row.style.fontWeight = 'bold';
+          }
+        });
+      } catch (e) {
+        console.error("Erro ao carregar histórico:", e);
+      }
+    }
+
+    function obterZonasAtivas() {
+      const zonas = [];
+      zonasDisponiveis.forEach(zona => {
+        const zonaId = `zona_${zona.toLowerCase().replace(/\s+/g, '_')}`;
+        const checkbox = document.getElementById(zonaId);
+        if (checkbox && checkbox.checked) {
+          zonas.push(zona);
+        }
+      });
+      return zonas;
+    }
+
+    async function enviarComando(endpoint, zonas = null, parametrosExtras = {}) {
+      const body = new URLSearchParams({
+        usuario: localStorage.getItem("usuario"),
+        senha: localStorage.getItem("senha"),
+        ...parametrosExtras
+      });
+
+      if (zonas) {
+        body.append("zonas", zonas.join(","));
+      }
+
+      return await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+    }
+  </script>
+</body>
+
+</html>
